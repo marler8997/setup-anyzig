@@ -1,0 +1,17 @@
+name: Test
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./
+      - run: zig 0.14.1 version
+      - run: zig version
+        working-directory: .github/workflows/minversionexample
+      - run: zig version
+        working-directory: .github/workflows/versionexample

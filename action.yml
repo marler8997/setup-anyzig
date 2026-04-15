@@ -1,0 +1,59 @@
+name: Setup anyzig
+description: Install anyzig so that `zig` (and any specific version like `zig 0.14.1`) is available in PATH.
+inputs:
+  use-cache:
+    description: Whether to cache the global Zig cache directory between runs.
+    default: 'true'
+  cache-key:
+    description: Additional cache key component for distinguishing matrix jobs. OS and job name are included automatically.
+    default: ''
+branding:
+  icon: tool
+  color: orange
+runs:
+  using: composite
+  steps:
+    - name: Cache Zig global cache
+      if: inputs.use-cache == 'true'
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/.cache/zig
+          ~/Library/Caches/zig
+          ~/AppData/Local/zig
+        key: zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-${{github.run_id}}
+        restore-keys: |
+          zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-
+    - name: Install anyzig
+      shell: bash
+      run: |
+        case "$(uname -m)" in
+          x86_64|amd64) ANYZIG_ARCH="x86_64" ;;
+          aarch64|arm64) ANYZIG_ARCH="aarch64" ;;
+          *) echo "Error: unsupported architecture '$(uname -m)'" >&2; exit 1 ;;
+        esac
+
+        case "$RUNNER_OS" in
+          Windows) ANYZIG_OS="windows"; EXT="zip" ;;
+          macOS)   ANYZIG_OS="macos";   EXT="tar.gz" ;;
+          Linux)   ANYZIG_OS="linux";   EXT="tar.gz" ;;
+          *) echo "Error: unsupported OS '$RUNNER_OS'" >&2; exit 1 ;;
+        esac
+
+        URL="https://github.com/marler8997/anyzig/releases/latest/download/anyzig-${ANYZIG_ARCH}-${ANYZIG_OS}.${EXT}"
+        echo "Downloading $URL"
+        mkdir -p "$HOME/anyzig"
+
+        if [[ "$EXT" == "zip" ]]; then
+          curl -fsSL -o anyzig.zip "$URL"
+          unzip -o anyzig.zip -d "$HOME/anyzig"
+          rm anyzig.zip
+        else
+          curl -fsSL "$URL" | tar -xz -C "$HOME/anyzig"
+        fi
+
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          cygpath -w "$HOME/anyzig" >> "$GITHUB_PATH"
+        else
+          echo "$HOME/anyzig" >> "$GITHUB_PATH"
+        fi
