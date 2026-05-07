@@ -13,14 +13,26 @@ branding:
 runs:
   using: composite
   steps:
+    - name: Determine cache paths
+      if: inputs.use-cache == 'true'
+      shell: bash
+      run: |
+        case "$RUNNER_OS" in
+          Linux)   zig_pkg_cache='~/.cache/zig/p';         hashstore='~/.local/share/anyzig/hashstore' ;;
+          macOS)   zig_pkg_cache='~/.cache/zig/p';         hashstore='~/Library/Application Support/anyzig/hashstore' ;;
+          Windows) zig_pkg_cache='~/AppData/Local/zig/p';  hashstore='~/AppData/Local/anyzig/hashstore' ;;
+        esac
+        {
+          echo 'ANYZIG_CACHE_PATHS<<EOF'
+          echo "$zig_pkg_cache"
+          echo "$hashstore"
+          echo 'EOF'
+        } >> "$GITHUB_ENV"
     - name: Cache Zig global cache
       if: inputs.use-cache == 'true'
       uses: actions/cache@v5
       with:
-        path: |
-          ~/.cache/zig
-          ~/Library/Caches/zig
-          ~/AppData/Local/zig
+        path: ${{ env.ANYZIG_CACHE_PATHS }}
         key: zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-${{github.run_id}}
         restore-keys: |
           zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-
