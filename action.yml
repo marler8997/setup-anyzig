@@ -5,7 +5,7 @@ inputs:
     description: Whether to cache the global Zig cache directory between runs.
     default: 'true'
   cache-key:
-    description: Additional cache key component for distinguishing matrix jobs. OS and job name are included automatically.
+    description: Additional cache key component for distinguishing matrix jobs. OS, arch and job name are included automatically.
     default: ''
 branding:
   icon: tool
@@ -33,16 +33,20 @@ runs:
       uses: actions/cache@v5
       with:
         path: ${{ env.ANYZIG_CACHE_PATHS }}
-        key: zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-${{github.run_id}}
+        key: zig-cache-${{github.job}}-${{runner.os}}-${{runner.arch}}-${{inputs.cache-key}}-${{github.run_id}}
         restore-keys: |
-          zig-cache-${{github.job}}-${{runner.os}}-${{inputs.cache-key}}-
+          zig-cache-${{github.job}}-${{runner.os}}-${{runner.arch}}-${{inputs.cache-key}}-
     - name: Install anyzig
       shell: bash
       run: |
-        case "$(uname -m)" in
-          x86_64|amd64) ANYZIG_ARCH="x86_64" ;;
-          aarch64|arm64) ANYZIG_ARCH="aarch64" ;;
-          *) echo "Error: unsupported architecture '$(uname -m)'" >&2; exit 1 ;;
+        # RUNNER_ARCH is the machine's arch, `uname -m` isn't: on windows-11-arm
+        # Git Bash is x86_64 and runs emulated
+        case "$RUNNER_ARCH" in
+          X64)   ANYZIG_ARCH="x86_64" ;;
+          ARM64) ANYZIG_ARCH="aarch64" ;;
+          X86)   ANYZIG_ARCH="x86" ;;
+          ARM)   ANYZIG_ARCH="arm" ;;
+          *) echo "Error: unsupported RUNNER_ARCH '$RUNNER_ARCH'" >&2; exit 1 ;;
         esac
 
         case "$RUNNER_OS" in

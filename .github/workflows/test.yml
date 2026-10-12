@@ -4,13 +4,27 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
+          - windows-latest
+          - windows-11-arm
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v5
       - uses: ./
       - run: zig 0.14.1 version
+      - name: zig is native to the runner
+        shell: bash
+        run: |
+          case "$RUNNER_ARCH" in
+            X64)   want=x86_64 ;;
+            ARM64) want=aarch64 ;;
+            *) echo "Error: unexpected RUNNER_ARCH '$RUNNER_ARCH'" >&2; exit 1 ;;
+          esac
+          zig 0.14.1 env | grep "\"target\": \"$want-"
       - run: zig version
         working-directory: .github/workflows/minversionexample
       - run: zig version

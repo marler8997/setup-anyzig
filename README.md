@@ -24,9 +24,12 @@ the version as the first argument (e.g. `zig 0.14.1 build`).
 
 Works on all GitHub-hosted runner OSes:
 
-- `ubuntu-latest`
+- `ubuntu-latest`, `ubuntu-24.04-arm`
 - `macos-latest`
-- `windows-latest`
+- `windows-latest`, `windows-11-arm`
+
+anyzig is installed for the runner's native arch (`RUNNER_ARCH`), so zig
+doesn't run emulated on arm runners.
 
 ## What is anyzig?
 
