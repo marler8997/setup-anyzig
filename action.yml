@@ -18,14 +18,14 @@ runs:
       shell: bash
       run: |
         case "$RUNNER_OS" in
-          Linux)   zig_pkg_cache='~/.cache/zig/p';         hashstore='~/.local/share/anyzig/hashstore' ;;
-          macOS)   zig_pkg_cache='~/.cache/zig/p';         hashstore='~/Library/Application Support/anyzig/hashstore' ;;
-          Windows) zig_pkg_cache='~/AppData/Local/zig/p';  hashstore='~/AppData/Local/anyzig/hashstore' ;;
+          Linux)   zig_pkg_cache='~/.cache/zig/p';         installs='~/.local/share/anyzig/zig' ;;
+          macOS)   zig_pkg_cache='~/.cache/zig/p';         installs='~/Library/Application Support/anyzig/zig' ;;
+          Windows) zig_pkg_cache='~/AppData/Local/zig/p';  installs='~/AppData/Local/anyzig/zig' ;;
         esac
         {
           echo 'ANYZIG_CACHE_PATHS<<EOF'
           echo "$zig_pkg_cache"
-          echo "$hashstore"
+          echo "$installs"
           echo 'EOF'
         } >> "$GITHUB_ENV"
     - name: Cache Zig global cache

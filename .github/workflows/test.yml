@@ -25,6 +25,12 @@ jobs:
             *) echo "Error: unexpected RUNNER_ARCH '$RUNNER_ARCH'" >&2; exit 1 ;;
           esac
           zig 0.14.1 env | grep "\"target\": \"$want-"
+      - name: zig is installed into a cached path
+        shell: bash
+        run: |
+          installs=$(sed -n 2p <<< "$ANYZIG_CACHE_PATHS")
+          installs="${installs/#\~/$HOME}"
+          ls "$installs/0.14.1" | grep -E '^zig(\.exe)?$'
       - run: zig version
         working-directory: .github/workflows/minversionexample
       - run: zig version
