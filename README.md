@@ -2,7 +2,7 @@
 
 GitHub Action to install [anyzig](https://github.com/marler8997/anyzig) so that
 `zig` is available in PATH. By default, anyzig will use the version declared in
-build.zig.zon. I also enables testing with multiple zig versions by passing
+build.zig.zon. Anyzig also enables testing with multiple zig versions by passing
 the version as the first argument (e.g. `zig 0.14.1 build`).
 
 ## Usage
